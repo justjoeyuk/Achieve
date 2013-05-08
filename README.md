@@ -18,6 +18,9 @@ Hey there. If you're reading this, it is likely you are looking for an Achieveme
 The code in Achievement is **very** simple. Now, lets start with loading the Achievement Manager:
 
 <pre><code>import achievement.core.AchievementManager;
+import achievement.notifications.*;
+import achievement.storage.DefaultLocalStorage;
+import achievement.core.Medal;
 
 private var achievementManager:AchievementManager;
 
