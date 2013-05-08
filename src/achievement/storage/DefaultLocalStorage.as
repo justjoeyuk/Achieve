@@ -1,4 +1,4 @@
-package achievement.storage
+﻿package achievement.storage
 {
 	import achievement.core.Medal;
 	import achievement.properties.Property;
@@ -9,12 +9,14 @@ package achievement.storage
 	
 	public class DefaultLocalStorage implements IAchievementStorage
 	{
-		private var _medalStorage:SharedObject = SharedObject.getLocal("medalBank_31");
-		private var _propertyStorage:SharedObject = SharedObject.getLocal("propertyBank_31");
+		private var _medalStorage:SharedObject;
+		private var _propertyStorage:SharedObject;
 		
 		
-		public function DefaultLocalStorage()
+		public function DefaultLocalStorage( medalLocation:String = "medalBank_local", propertyLocation:String = "propertyBank_local" )
 		{
+			_medalStorage = SharedObject.getLocal(medalLocation);
+			_propertyStorage = SharedObject.getLocal(propertyLocation);
 		}
 		
 		public function saveProperty(property:Property):void

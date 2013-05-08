@@ -1,4 +1,4 @@
-package achievement.core
+﻿package achievement.core
 {
 	import achievement.events.MedalEvent;
 	import achievement.events.PropertyEvent;
@@ -29,6 +29,7 @@ package achievement.core
 		private var _saveTimer:Timer;
 		private var _changedProperties:Vector.<Property>;
 		private var _notifier:IAchievementNotify;
+		private var _devMode:Boolean = false;
 		
 		
 		/**
@@ -194,9 +195,13 @@ package achievement.core
 			var property:Property = getProperty(propertyName);
 			property.addOwner(medal);
 			medal.assignProperty(property);
-			_storage.saveMedal(medal);
-			_storage.saveProperty(property);
-			_storage.flush();
+			
+			if( !_devMode )
+			{
+				_storage.saveMedal(medal);
+				_storage.saveProperty(property);
+				_storage.flush();
+			}
 		}
 		
 		
@@ -211,6 +216,7 @@ package achievement.core
 		{
 			var numChanged:int = _changedProperties.length;
 			if( numChanged == 0 ) return;
+			if( _devMode ) return; 
 			
 			for( var i:int = 0; i < _changedProperties.length; i++ )
 			{
@@ -325,7 +331,7 @@ package achievement.core
 				property.isActive = false;
 			
 			if( _changedProperties.indexOf(property) == -1 ) _changedProperties.push(property);
-			saveProperties(null);
+			if( !_devMode ) saveProperties(null);
 		}
 		
 		
@@ -341,7 +347,7 @@ package achievement.core
 		{
 			var medal:Medal = event.target as Medal;
 			medal.removeEventListener(MedalEvent.UNLOCKED, onMedalUnlock);
-			_storage.saveMedal(medal);
+			if( !_devMode ) _storage.saveMedal(medal);
 			if( _onUnlock != null ) _onUnlock(medal);
 		}
 		
@@ -353,6 +359,12 @@ package achievement.core
 		 * <code>function myCustomUnlock( medalUnlocked:Medal ):void</code>
 		 */
 		public function set onUnlock( value:Function ):void { _onUnlock = value; }
+		
+		
+		public function set devMode( value:Boolean ):void { _devMode = value; }
+		
+		
+		public function get devMode():Boolean:void { return _devMode; }
 		
 		
 		public function set notifier( value:IAchievementNotify ):void { _notifier = value; }
