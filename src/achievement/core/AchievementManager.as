@@ -391,12 +391,12 @@ package achievement.core
 		public function get devMode():Boolean { return _devMode; }
 		
 		
-		public function getUnlockedMedals():Dictionary
+		public function getUnlockedMedals():Array
 		{
-			var tempBank:Dictionary = new Dictionary();
+			var tempBank:Array = [];
 			for each( var medal:Medal in _medalBank )
 			{
-				tempBank[medal.name] = medal;
+				tempBank.push(medal);
 			}
 			return tempBank;
 		}

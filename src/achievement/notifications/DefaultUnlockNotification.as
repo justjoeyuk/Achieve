@@ -43,6 +43,8 @@
 		private var _retreatTimeInMillis:uint;
 		private var _retreating:Boolean;
 		private var _speed:int;
+		private var _queue:Array =[];
+		private var _busy:Boolean = false;
 		
 		
 		public function DefaultUnlockNotification( stage:Stage, theme:Object, alignment:String = NotificationAlign.BOTTOM,
@@ -52,8 +54,6 @@
 			_speed = speed;
 			_retreatTimeInMillis = delayInMillis;
 			_bounds = new Rectangle( 0,0,stage.stageWidth, stage.stageHeight );
-			_rectangle = new Sprite();
-			_rectangle.buttonMode = true;
 			_transparency = 1;
 			_active = false;
 			_alignment = alignment;
@@ -84,81 +84,91 @@
 		 */
 		public function notify(medal:Medal):void
 		{
-			_stage.addChild(_rectangle);
-			
-			_rectangle.graphics.beginFill(_rectFillColor, _transparency);
-			var notificationWidth:Number;
-			var notificationHeight:Number = getFromPercentage(15, _stage.stageHeight);
-			
-			if( _stage.stageHeight > _stage.stageWidth )
+			if( _busy )
 			{
-				notificationWidth = _stage.stageWidth;
-				_rectangle.graphics.drawRect(0,0, notificationWidth, notificationHeight);
-			}	
-			else
-			{
-				notificationWidth = _stage.stageWidth / 2;
-				_rectangle.graphics.drawRect( 0, 0,
-											  notificationWidth, notificationHeight);
-				_rectangle.x = notificationWidth - notificationWidth / 2;
-			}
-			
-			if( _alignment == NotificationAlign.BOTTOM )
-			{
-				_startYPos = _stage.stageHeight;
-				_endYPos = _stage.stageHeight - getFromPercentage(15, _stage.stageHeight);
-				_direction = -1;
+				_queue.push(medal);
 			}
 			else
 			{
-				_startYPos = -getFromPercentage(15, _stage.stageHeight);
-				_endYPos = 0;
-				_direction = 1;
-			}
-			_rectangle.y = _startYPos;
-			
-			var notificationTextFormat:TextFormat = new TextFormat("Arial", Math.floor(_stage.stageHeight / 32), _notifyTextColor, true, null, null, null, null, TextAlign.CENTER );
-			var medalNameFormat:TextFormat = new TextFormat("Arial", Math.floor(_stage.stageHeight / 32), _medalNameTextColor, true, null, null, null, null, TextAlign.CENTER);
-			var pointsFormat:TextFormat = new TextFormat("Arial", Math.floor( _stage.stageHeight / 40 ), _pointsTextColor, true, null, null, null, null, TextAlign.CENTER);
-			
-			_notifyTextField = new TextField();
-			_notifyTextField.defaultTextFormat = notificationTextFormat;
-			_notifyTextField.autoSize = TextFieldAutoSize.CENTER;
-			
-			_notifyTextField.text = "Achievement Unlocked!";
-			_notifyTextField.y = (getFromPercentage(30, notificationHeight) / 2) - (_notifyTextField.height/2);
-			_notifyTextField.x = (notificationWidth / 2) - (_notifyTextField.width / 2);
-			
-			_rectangle.addChild(_notifyTextField);
-			
-			_medalNameTextField = new TextField();
-			_medalNameTextField.defaultTextFormat = medalNameFormat;
-			_medalNameTextField.autoSize = TextFieldAutoSize.CENTER;
-			
-			_medalNameTextField.text = medal.name;
-			_medalNameTextField.y = _notifyTextField.y + (_notifyTextField.height);
-			_medalNameTextField.x = (notificationWidth / 2) - (_medalNameTextField.width / 2);
-			
-			_rectangle.addChild(_medalNameTextField);
-			
-			if( medal.pointsValue != 0 )
-			{
-				_pointsTextField = new TextField();
-				_pointsTextField.defaultTextFormat = pointsFormat;
-				_pointsTextField.autoSize = TextFieldAutoSize.CENTER;
+				_busy = true;
+				_rectangle = new Sprite();
+				_rectangle.buttonMode = true;
+				_stage.addChild(_rectangle);
 				
-				_pointsTextField.text = medal.pointsValue.toString() + "ap";
-				_pointsTextField.y = notificationHeight - (_pointsTextField.height);
-				_pointsTextField.x = (notificationWidth / 2) - (_pointsTextField.width / 2);
+				_rectangle.graphics.beginFill(_rectFillColor, _transparency);
+				var notificationWidth:Number;
+				var notificationHeight:Number = getFromPercentage(15, _stage.stageHeight);
 				
-				_rectangle.addChild(_pointsTextField);
+				if( _stage.stageHeight > _stage.stageWidth )
+				{
+					notificationWidth = _stage.stageWidth;
+					_rectangle.graphics.drawRect(0,0, notificationWidth, notificationHeight);
+				}	
+				else
+				{
+					notificationWidth = _stage.stageWidth / 2;
+					_rectangle.graphics.drawRect( 0, 0,
+												  notificationWidth, notificationHeight);
+					_rectangle.x = notificationWidth - notificationWidth / 2;
+				}
+				
+				if( _alignment == NotificationAlign.BOTTOM )
+				{
+					_startYPos = _stage.stageHeight;
+					_endYPos = _stage.stageHeight - getFromPercentage(15, _stage.stageHeight);
+					_direction = -1;
+				}
+				else
+				{
+					_startYPos = -getFromPercentage(15, _stage.stageHeight);
+					_endYPos = 0;
+					_direction = 1;
+				}
+				_rectangle.y = _startYPos;
+				
+				var notificationTextFormat:TextFormat = new TextFormat("Arial", Math.floor(_stage.stageHeight / 32), _notifyTextColor, true, null, null, null, null, TextAlign.CENTER );
+				var medalNameFormat:TextFormat = new TextFormat("Arial", Math.floor(_stage.stageHeight / 32), _medalNameTextColor, true, null, null, null, null, TextAlign.CENTER);
+				var pointsFormat:TextFormat = new TextFormat("Arial", Math.floor( _stage.stageHeight / 40 ), _pointsTextColor, true, null, null, null, null, TextAlign.CENTER);
+				
+				_notifyTextField = new TextField();
+				_notifyTextField.defaultTextFormat = notificationTextFormat;
+				_notifyTextField.autoSize = TextFieldAutoSize.CENTER;
+				
+				_notifyTextField.text = "Achievement Unlocked!";
+				_notifyTextField.y = (getFromPercentage(30, notificationHeight) / 2) - (_notifyTextField.height/2);
+				_notifyTextField.x = (notificationWidth / 2) - (_notifyTextField.width / 2);
+				
+				_rectangle.addChild(_notifyTextField);
+				
+				_medalNameTextField = new TextField();
+				_medalNameTextField.defaultTextFormat = medalNameFormat;
+				_medalNameTextField.autoSize = TextFieldAutoSize.CENTER;
+				
+				_medalNameTextField.text = medal.name;
+				_medalNameTextField.y = _notifyTextField.y + (_notifyTextField.height);
+				_medalNameTextField.x = (notificationWidth / 2) - (_medalNameTextField.width / 2);
+				
+				_rectangle.addChild(_medalNameTextField);
+				
+				if( medal.pointsValue != 0 )
+				{
+					_pointsTextField = new TextField();
+					_pointsTextField.defaultTextFormat = pointsFormat;
+					_pointsTextField.autoSize = TextFieldAutoSize.CENTER;
+					
+					_pointsTextField.text = medal.pointsValue.toString() + "ap";
+					_pointsTextField.y = notificationHeight - (_pointsTextField.height);
+					_pointsTextField.x = (notificationWidth / 2) - (_pointsTextField.width / 2);
+					
+					_rectangle.addChild(_pointsTextField);
+				}
+				
+				_rectangle.cacheAsBitmap = true;
+				_active = true;
+				_retreating = false;
+				_rectangle.addEventListener(Event.ENTER_FRAME, updateNotification);
+				_rectangle.addEventListener(MouseEvent.CLICK, onNotificationClick);
 			}
-			
-			_rectangle.cacheAsBitmap = true;
-			_active = true;
-			_retreating = false;
-			_rectangle.addEventListener(Event.ENTER_FRAME, updateNotification);
-			_rectangle.addEventListener(MouseEvent.CLICK, onNotificationClick);
 		}
 		
 		
@@ -196,8 +206,14 @@
 				{
 					_rectangle.removeEventListener(Event.ENTER_FRAME, updateNotification);
 					_stage.removeChild(_rectangle);
+					_rectangle = null;
 					_active = false;
 					_retreating = false;
+					if( _queue.length != 0 )
+					{
+						_busy = false;
+						notify(_queue.shift());
+					}
 				}
 			}
 		}	
