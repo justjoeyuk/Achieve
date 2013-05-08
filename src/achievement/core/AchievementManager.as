@@ -1,4 +1,4 @@
-﻿package achievement.core
+package achievement.core
 {
 	import achievement.events.MedalEvent;
 	import achievement.events.PropertyEvent;
@@ -216,14 +216,16 @@
 		{
 			var numChanged:int = _changedProperties.length;
 			if( numChanged == 0 ) return;
-			if( _devMode ) return; 
 			
-			for( var i:int = 0; i < _changedProperties.length; i++ )
+			if( !_devMode )
 			{
-				_storage.saveProperty(_changedProperties[i]);
+				for( var i:int = 0; i < _changedProperties.length; i++ )
+				{
+					_storage.saveProperty(_changedProperties[i]);
+				}
+				
+				_storage.flush();
 			}
-			
-			_storage.flush();
 			_changedProperties.length = 0;
 		}
 		
@@ -253,8 +255,27 @@
 		 */
 		private function getProperty( propertyName:String ):Property
 		{
-			if( _propertyBank[propertyName] == null ) throw new IllegalOperationError("There is no Achievement Property called: " + propertyName, 003);
+			if( _propertyBank[propertyName] == null ) throw new IllegalOperationError("There is no Achievement Property called: " + propertyName + " .. Maybe you are trying to access a completed property although you made it when 'removeWhenInactive' was set to true?", 003);
 			return _propertyBank[propertyName];
+		}
+		
+		
+		/**
+		 * <p>Enables you to change the final value 
+		 * or the condition for the completion of the 
+		 * property.</p>
+		 * 
+		 * @param propertyName -- The name of the property to reset.
+		 * @param finalValue -- The new final value of the property.
+		 * @param condition -- The completion condition for the property.
+		 * @param removeWhenInactive -- Delete the property when it's complete or not.
+		 * 
+		 */
+		public function resetProperty( propertyName:String, finalValue:Object, removeWhenInactive:Boolean = true, condition:String = Property.DEFAULT ):void
+		{
+			var property:Property = getProperty(propertyName);
+			property.finalValue = finalValue;
+			property.condition = condition;
 		}
 		
 		
@@ -347,7 +368,7 @@
 		{
 			var medal:Medal = event.target as Medal;
 			medal.removeEventListener(MedalEvent.UNLOCKED, onMedalUnlock);
-			if( !_devMode ) _storage.saveMedal(medal);
+			if(!_devMode) _storage.saveMedal(medal);
 			if( _onUnlock != null ) _onUnlock(medal);
 		}
 		
@@ -361,10 +382,24 @@
 		public function set onUnlock( value:Function ):void { _onUnlock = value; }
 		
 		
-		public function set devMode( value:Boolean ):void { _devMode = value; }
+		/**
+		 * <p>The function to be called whenever you wish to 
+		 * be in developer mode. In developer mode, the 
+		 * properties and medals will not be saved.</p>
+		 */
+		public function set devMode( value:Boolean ):void {_devMode = value; }
+		public function get devMode():Boolean { return _devMode; }
 		
 		
-		public function get devMode():Boolean:void { return _devMode; }
+		public function getUnlockedMedals():Dictionary
+		{
+			var tempBank:Dictionary = new Dictionary();
+			for each( var medal:Medal in _medalBank )
+			{
+				tempBank[medal.name] = medal;
+			}
+			return tempBank;
+		}
 		
 		
 		public function set notifier( value:IAchievementNotify ):void { _notifier = value; }
