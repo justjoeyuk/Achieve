@@ -383,28 +383,70 @@ package achievement.core
 		
 		
 		/**
-		 * <p>The function to be called whenever you wish to 
+		 * <p>Set this true whenever you wish to 
 		 * be in developer mode. In developer mode, the 
 		 * properties and medals will not be saved.</p>
 		 */
 		public function set devMode( value:Boolean ):void {_devMode = value; }
+		
+		
+		/**
+		 * <p>Returns whether you are in Dev Mode 
+		 * or not</p>
+		 * 
+		 * @return -- returns true/false depending on if you're in Dev Mode or not.
+		 */
 		public function get devMode():Boolean { return _devMode; }
 		
 		
+		/**
+		 * <p>This will retrieve and array of Medals that 
+		 * are unlocked. This allows you to easily filter them out.</p>
+		 * 
+		 * @return -- returns an Array of unlocked Medals.
+		 */
 		public function getUnlockedMedals():Array
 		{
 			var tempBank:Array = [];
 			for each( var medal:Medal in _medalBank )
 			{
-				tempBank.push(medal);
+				if( medal.isUnlocked ) tempBank.push(medal);
 			}
 			return tempBank;
 		}
 		
 		
+		/**
+		 * <p>Sets the notification for the unlocked medals. 
+		 * To make your own, you must implement the <code>IAchievementNotify</code> 
+		 * interface and its corresponding methods. You can use a preset one 
+		 * by passing in
+		 * <code>new DefaultUnlockNotification(stage, theme, alignment)</code>
+		 * where <code>theme</code> can be chosen from <code>NotificationTheme.as</code> as a 
+		 * static property. Also, the Alignment can be set with <code>NotificationAlign.as</code>.
+		 * </p>
+		 * 
+		 * @param value -- The notifier to use.
+		 * @see IAchievementNotify
+		 * @see NotificationAlign
+		 * @see NotificationTheme
+		 */
 		public function set notifier( value:IAchievementNotify ):void { _notifier = value; }
 		
 		
+		/**
+		 * <p>Sets the storage method for the properties and unlocked medals. 
+		 * To make your own, you must implement the <code>IAchievementStorage</code> 
+		 * interface and its corresponding methods. You can use a preset one 
+		 * by passing in
+		 * <code>new DefaultLocalStorage(medalLocation, propertyLocation)</code>
+		 * where <code>medalLocation</code> can be any string and <code>propertyLocation</code> 
+		 * can also be any string.
+		 * </p>
+		 * 
+		 * @param value -- The storage to use.
+		 * @see IAchievementStorage
+		 */
 		public function set storage( value:IAchievementStorage ):void { _storage = value; }
 		
 		
